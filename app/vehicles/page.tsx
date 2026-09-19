@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Shell from '@/components/Shell';
 import { C, Card, Input, Table, Td, Pagination, Spinner, EmptyState } from '@/components/ui';
-import { api, VehicleSummary, toJalali } from '@/lib/api';
+import { api, VehicleSummary, toJalali, num } from '@/lib/api';
 
 export default function VehiclesPage() {
   const [q, setQ] = useState('');
@@ -37,7 +37,7 @@ export default function VehiclesPage() {
               <tr key={v.id}>
                 <Td>{v.make} {v.model} <span style={{ color: C.subtle }}>({v.year})</span></Td>
                 <Td style={{ direction: 'ltr', textAlign: 'right' }}>{v.plateNumber || '—'}</Td>
-                <Td>{v.currentMileage.toLocaleString()} km</Td>
+                <Td>{num(v.currentMileage)} km</Td>
                 <Td>{v.ownerName || '—'}</Td>
                 <Td style={{ direction: 'ltr', textAlign: 'right' }}>{v.ownerPhone || '—'}</Td>
                 <Td>{toJalali(v.createdAt)}</Td>

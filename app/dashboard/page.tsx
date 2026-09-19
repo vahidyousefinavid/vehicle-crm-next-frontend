@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Shell from '@/components/Shell';
 import { C, Card, Spinner } from '@/components/ui';
-import { api, DashboardStats, APPOINTMENT_STATUS_LABEL } from '@/lib/api';
+import { api, DashboardStats, APPOINTMENT_STATUS_LABEL, num, money } from '@/lib/api';
 
 function StatCard({ label, value, sub, color = C.accent }: { label: string; value: string; sub?: string; color?: string }) {
   return (
@@ -32,14 +32,14 @@ export default function DashboardPage() {
       ) : (
         <>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 14, marginBottom: 20 }}>
-            <StatCard label="مالکان" value={String(stats.owners)} sub={`${stats.activeOwners} فعال`} color={C.accent} />
-            <StatCard label="مکانیک‌ها" value={String(stats.mechanics)} sub={`${stats.activeMechanics} فعال`} color="#22C55E" />
-            <StatCard label="فروشندگان" value={String(stats.sellers)} sub={`${stats.activeSellers} فعال`} color="#818CF8" />
-            <StatCard label="خودروهای ثبت‌شده" value={String(stats.vehicleCount)} color="#F59E0B" />
-            <StatCard label="محصولات" value={String(stats.productCount)} color="#F472B6" />
-            <StatCard label="سازمان‌ها" value={String(stats.organizationCount)} color="#EC4899" />
-            <StatCard label="درآمد کل" value={`${stats.totalRevenue.toLocaleString()} ت`} color="#22C55E" />
-            <StatCard label="میانگین امتیاز" value={stats.avgRating ? String(stats.avgRating) : '—'} sub={`${stats.reviewCount} نظر`} color="#FBBF24" />
+            <StatCard label="مالکان" value={num(stats.owners)} sub={`${num(stats.activeOwners)} فعال`} color={C.accent} />
+            <StatCard label="مکانیک‌ها" value={num(stats.mechanics)} sub={`${num(stats.activeMechanics)} فعال`} color="#22C55E" />
+            <StatCard label="فروشندگان" value={num(stats.sellers)} sub={`${num(stats.activeSellers)} فعال`} color="#818CF8" />
+            <StatCard label="خودروهای ثبت‌شده" value={num(stats.vehicleCount)} color="#F59E0B" />
+            <StatCard label="محصولات" value={num(stats.productCount)} color="#F472B6" />
+            <StatCard label="سازمان‌ها" value={num(stats.organizationCount)} color="#EC4899" />
+            <StatCard label="درآمد کل" value={money(stats.totalRevenue)} color="#22C55E" />
+            <StatCard label="میانگین امتیاز" value={stats.avgRating ? num(stats.avgRating) : '—'} sub={`${num(stats.reviewCount)} نظر`} color="#FBBF24" />
           </div>
 
           <Card>
@@ -50,7 +50,7 @@ export default function DashboardPage() {
               ) : (
                 Object.entries(stats.appointmentsByStatus).map(([status, count]) => (
                   <div key={status} style={{ background: C.surface2, border: `1px solid ${C.border}`, borderRadius: 12, padding: '12px 14px', textAlign: 'center' }}>
-                    <p style={{ fontSize: 20, fontWeight: 900, color: C.text, margin: 0 }}>{count}</p>
+                    <p style={{ fontSize: 20, fontWeight: 900, color: C.text, margin: 0 }}>{num(count)}</p>
                     <p style={{ fontSize: 11.5, color: C.muted, margin: '4px 0 0' }}>{APPOINTMENT_STATUS_LABEL[status] || status}</p>
                   </div>
                 ))

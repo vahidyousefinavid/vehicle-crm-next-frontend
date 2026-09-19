@@ -12,6 +12,11 @@
   --subtle: #5B6580;
   --accent: #6366F1;
   --accent-dark: #4F46E5;
+
+  /* Everything responsive keys off this one breakpoint. Media queries cannot
+     read a custom property, so the value is repeated in each @media below —
+     change it here and there together. */
+  --mobile: 860px;
 }
 
 * { box-sizing: border-box; }
@@ -24,8 +29,242 @@ html, body {
 
 body { margin: 0; }
 
+/* A long word or an ltr identifier must never push the page sideways. */
+body { overflow-x: hidden; }
+
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
 table { border-collapse: collapse; width: 100%; }
+
+/* ── app shell ──────────────────────────────────────────────────────────
+   Desktop: a sticky rail beside the content.
+   Mobile:  the same rail slides in over the content from the right (RTL),
+            behind a top bar. The skeleton is CSS so the first paint is
+            already correct; React only owns the open/closed flag.          */
+
+.shell { display: flex; min-height: 100vh; }
+
+.shell-topbar { display: none; }
+
+.shell-aside {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.shell-main {
+  flex: 1;
+  min-width: 0;              /* lets flex children shrink instead of overflowing */
+  padding: 26px 32px;
+  max-width: 1200px;
+}
+
+.shell-scrim { display: none; }
+
+@media (max-width: 860px) {
+  .shell { display: block; }
+
+  .shell-topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 14px;
+  }
+
+  .shell-aside {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    height: 100dvh;
+    width: 264px;
+    max-width: 84vw;
+    z-index: 60;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.22s ease;
+    box-shadow: -18px 0 40px rgba(0, 0, 0, 0.45);
+  }
+  .shell-aside[data-open='true'] { transform: translateX(0); }
+
+  .shell-scrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(4, 7, 14, 0.6);
+  }
+
+  .shell-main { padding: 16px 14px 40px; max-width: none; }
+
+  /* iOS zooms the page when a focused field is under 16px. */
+  input, select, textarea { font-size: 16px !important; }
+
+  /* Comfortable touch targets without changing the desktop rhythm. */
+  button, .shell-aside a { min-height: 40px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shell-aside { transition: none; }
+}
+
+/* ── data tables ────────────────────────────────────────────────────────
+   Below the breakpoint each row becomes a card and every cell carries its
+   column name, so no list needs a sideways scroll on a phone.             */
+
+.dt-wrap { overflow-x: auto; }
+
+.dt-th {
+  text-align: right;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.dt-td {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+@media (max-width: 860px) {
+  .dt-wrap { overflow-x: visible; }
+  .dt, .dt tbody, .dt tr, .dt td { display: block; width: 100%; }
+  .dt thead { display: none; }
+
+  .dt tr {
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface2);
+    margin: 0 12px 10px;
+    padding: 4px 0;
+    overflow: hidden;
+  }
+  .dt tbody tr:last-child { margin-bottom: 12px; }
+  .dt tbody tr:first-child { margin-top: 12px; }
+
+  .dt .dt-td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  .dt tr .dt-td:last-child { border-bottom: none; }
+
+  /* The column name, taken from the table head. */
+  .dt .dt-td[data-label]:not([data-label=''])::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    padding-top: 2px;
+  }
+
+  .dt-cell-value { min-width: 0; flex: 1 1 auto; text-align: left; }
+
+  /* An unlabelled cell is the actions column: it takes the whole card width and
+     its buttons share the row evenly, which is easier to hit than a huddle in
+     one corner. */
+  .dt .dt-td[data-label=''] { justify-content: stretch; }
+  .dt .dt-td[data-label=''] .dt-cell-value { width: 100%; text-align: right; }
+  .dt .dt-td[data-label=''] .dt-cell-value > div { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+  .dt .dt-td[data-label=''] .dt-cell-value button { flex: 1 1 auto; }
+
+  /* A checkbox on its own line reads as an empty row; keep it compact. */
+  .dt .dt-td[data-label='انتخاب'] { padding-top: 12px; padding-bottom: 12px; }
+}
+
+/* ── responsive helpers used by page toolbars ───────────────────────────── */
+
+/* search field + button */
+.row-search { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+/* search field + category select + button */
+.row-filter { display: grid; grid-template-columns: 1fr 200px auto; gap: 10px; align-items: center; }
+/* a wide main column beside a narrow aside */
+.split-main { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr); gap: 16px; align-items: start; }
+/* dot + body + timestamp */
+.feed-row { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center; }
+/* page heading beside its action */
+.page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+
+@media (max-width: 860px) {
+  .row-search, .row-filter, .split-main { grid-template-columns: 1fr; }
+  .feed-row { grid-template-columns: auto 1fr; }
+  .feed-row > :last-child { grid-column: 2; }
+  .page-head > * { min-width: 0; }
+  .page-head button { width: 100%; }
+}
+
+/* A tab strip scrolls sideways on a phone instead of stacking many rows. */
+.tabstrip { display: flex; gap: 7px; flex-wrap: wrap; }
+
+@media (max-width: 860px) {
+  .tabstrip {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+    margin-inline: -14px;
+    padding-inline: 14px;
+  }
+  .tabstrip::-webkit-scrollbar { display: none; }
+  .tabstrip > * { flex: 0 0 auto; }
+}
+
+/* ── dialogs ────────────────────────────────────────────────────────────── */
+
+.modal-shell {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: 100%;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 80px);
+}
+.modal-body { padding: 18px 20px; overflow-y: auto; }
+
+@media (max-width: 860px) {
+  .modal-scrim { padding: 0 !important; align-items: flex-end !important; }
+  .modal-shell {
+    max-width: none !important;
+    border-radius: 18px 18px 0 0;
+    max-height: 92dvh;
+  }
+  .modal-body { padding: 16px 14px; }
+  .modal-foot { flex-wrap: wrap; }
+  .modal-foot button { flex: 1 1 auto; }
+}
+
+/* Long ltr identifiers (phone numbers, keys, plates) break instead of pushing. */
+[dir='ltr'] { overflow-wrap: anywhere; }
+
+/* The drawer's own close button has no place on a desktop, where the rail is
+   always visible. */
+.drawer-close { display: none; }
+@media (max-width: 860px) { .drawer-close { display: block; } }

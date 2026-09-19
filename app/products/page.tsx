@@ -3,7 +3,7 @@ import { Suspense, useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Shell from '@/components/Shell';
 import { C, Card, Button, Input, Badge, Table, Td, Pagination, Spinner, EmptyState } from '@/components/ui';
-import { api, ProductRow, productImageUrl, toJalali } from '@/lib/api';
+import { api, ProductRow, productImageUrl, toJalali, money } from '@/lib/api';
 
 export default function ProductsPage() {
   return (
@@ -62,7 +62,7 @@ function ProductsPageInner() {
                 </Td>
                 <Td>{p.name}</Td>
                 <Td>{p.category || '—'}</Td>
-                <Td>{p.price.toLocaleString()} ت</Td>
+                <Td>{money(p.price)}</Td>
                 <Td>{p.stock} {p.unit}</Td>
                 <Td>{p.sellerName || '—'}</Td>
                 <Td><Badge color={p.active ? C.green : C.muted}>{p.active ? 'فعال' : 'غیرفعال'}</Badge></Td>

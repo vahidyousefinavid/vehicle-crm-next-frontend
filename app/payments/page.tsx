@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Shell from '@/components/Shell';
 import { C, Card, Button, Badge, Table, Td, Pagination, Spinner, EmptyState } from '@/components/ui';
-import { api, PaymentRow, PaymentSummary, PAYMENT_STATUS_LABEL, toJalali } from '@/lib/api';
+import { api, PaymentRow, PaymentSummary, PAYMENT_STATUS_LABEL, toJalali, money } from '@/lib/api';
 
 const STATUS_COLOR: Record<string, string> = { pending: '#F59E0B', success: '#22C55E', failed: '#EF4444' };
 const STATUSES = ['pending', 'success', 'failed'];
@@ -31,13 +31,13 @@ export default function PaymentsPage() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 18 }}>
           <Card>
             <p style={{ fontSize: 11.5, color: C.muted, fontWeight: 700, margin: 0 }}>درآمد کل (موفق)</p>
-            <p style={{ fontSize: 22, fontWeight: 900, color: C.text, margin: '8px 0 0' }}>{summary.totalRevenue.toLocaleString()} ت</p>
+            <p style={{ fontSize: 22, fontWeight: 900, color: C.text, margin: '8px 0 0' }}>{money(summary.totalRevenue)}</p>
           </Card>
           {summary.byStatus.map((s) => (
             <Card key={s.status}>
               <p style={{ fontSize: 11.5, color: C.muted, fontWeight: 700, margin: 0 }}>{PAYMENT_STATUS_LABEL[s.status] || s.status}</p>
               <p style={{ fontSize: 22, fontWeight: 900, color: C.text, margin: '8px 0 0' }}>{s.count}</p>
-              <p style={{ fontSize: 11, color: C.subtle, margin: '4px 0 0' }}>{s.total.toLocaleString()} ت</p>
+              <p style={{ fontSize: 11, color: C.subtle, margin: '4px 0 0' }}>{money(s.total)}</p>
             </Card>
           ))}
         </div>
@@ -61,7 +61,7 @@ export default function PaymentsPage() {
           <Table head={['مبلغ', 'وضعیت', 'کد پیگیری', 'تاریخ']}>
             {data.items.map((p) => (
               <tr key={p.id}>
-                <Td>{p.amount.toLocaleString()} ت</Td>
+                <Td>{money(p.amount)}</Td>
                 <Td><Badge color={STATUS_COLOR[p.status] || C.muted}>{PAYMENT_STATUS_LABEL[p.status] || p.status}</Badge></Td>
                 <Td style={{ direction: 'ltr', textAlign: 'right' }}>{p.refId || '—'}</Td>
                 <Td>{toJalali(p.createdAt)}</Td>
